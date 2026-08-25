@@ -84,18 +84,33 @@ upstream needs a reason in its inventory entry for why not.
 - Integration branch: `integration`, every carried feature composed together.
   It is the only ref the installer builds and binds, and it is nobody's review
   context.
-- Composition: **carry heads**. Each carried feature is a `carry/<feature>`
-  branch based on current upstream, and `integration` is those heads composed
-  in dependency order in a scratch worktree each cycle. This is the model
-  because the two features that matter are offered upstream whole and
-  independently: when #169 lands, `carry/account-capacity-metadata` is dropped
-  without disturbing the recovery work, and vice versa. A linear stack would
-  make each retirement a rebase of everything above it.
+- Composition: **carry heads**. Each carried feature owns a `carry/<feature>`
+  branch, and `integration` is those heads composed in dependency order in a
+  scratch worktree each cycle. This is the model because the two features that
+  matter are offered upstream whole and independently: when #169 lands,
+  `carry/account-capacity-metadata` is dropped by rebuilding the composition
+  without its commits, which does not disturb the recovery work, and vice
+  versa. A linear stack would make each retirement a rebase of everything
+  above it.
 - Dependency order, which is not alphabetical and is part of the model:
   `carry/account-capacity-metadata`, `carry/recover-expired-token`,
   `carry/deferred-shared-history-resume`, `carry/already-routed-sentinel`,
   `carry/fork-packaging`. The last two touch files the earlier heads create,
   so they compose after them and are repaired against them.
+- How the heads are built, which the ancestry requirement decides. Every carry
+  head must be an ancestor of the published `integration`; reconciliation
+  refuses a head that is not, and `carry/already-routed-sentinel` and
+  `carry/fork-packaging` cannot sit on bare upstream at all, because the files
+  they patch do not exist until the earlier heads create them. So the
+  composition is built once, as one chain on current upstream in the
+  dependency order above, and each `carry/<feature>` head is the tip of its own
+  segment of that chain: the first head sits on upstream, each later head on
+  the head before it, and `carry/fork-packaging` is the integration candidate
+  itself. A head therefore *contains* the heads it depends on and *owns* only
+  the commits above its predecessor — those commits, not the head's ancestry,
+  are the feature. Independence is preserved by rebuilding, not by disjoint
+  branches: every head is rebuilt from its feature's commits each cycle, so
+  retiring one is a composition that omits it.
 - Publication: standing authorization for `fork`'s `integration` ref alone. A
   green `## Gate` on the exact commit is the authority; `main`, every
   `carry/*` head, and every upstream ref stay untouched by publication, and
@@ -199,8 +214,20 @@ unfinished work, because a later cycle reconciles only what this section names.
 - Test contracts that our carried features change are kept true here rather
   than inside the feature heads, so a feature head stays shaped the way its
   upstream offer is.
-- Never offerable: it is entirely about being a fork. It retires when the fork
-  does.
+- It also holds test contracts that no carried feature changes: adjustments
+  that make *upstream's own* suite pass on this machine. Two of them fix a
+  genuine upstream defect — on macOS, the `TestUnreadableSourceIsNotAbsent`
+  probes in `tests/test_move_accounts.py` and `tests/test_swap_accounts.py`
+  chmod a `.creds-*.enc` that the healthy Keychain path never writes, so
+  `Path.chmod` raises `FileNotFoundError`. Upstream's CI cannot see it: its
+  macOS job runs only the two keychain suites, and the full-suite jobs are
+  Ubuntu and Windows.
+- Never offerable: it is entirely about being a fork. The macOS test fix above
+  is the one part that *could* stand alone as an offer, and the operator
+  decided on 2026-08-25 not to make it — upstream has left our two existing
+  requests unreviewed since 2026-07-23, and a third would add review surface
+  to a queue nobody is reading while buying nothing agentusage needs. Revisit
+  only if upstream starts reviewing again. It retires when the fork does.
 
 ## Gate
 
@@ -226,6 +253,47 @@ External proof: the fork's CI must be green on the exact candidate commit
 before publication. Push the candidate to a newly named temporary branch on
 the fork to obtain it, touching neither `integration` nor any preserved head.
 A stale, partial, skipped, or cancelled run is not proof.
+
+Obtaining that run is not automatic, and the reason is a conflict between two
+requirements above. The fork's `ci.yml` fires on push to `main`, on pull
+requests targeting `main`, and on `workflow_dispatch`; a push to a temporary
+branch matches none of them. `workflow_dispatch` would answer, but GitHub only
+offers it when the workflow declares it **on the default branch** — and the
+default branch is `main`, which `## Branch model` requires to be an exact
+upstream mirror, and upstream's `ci.yml` has no `workflow_dispatch`. The mirror
+requirement removes the gate's own trigger.
+
+The reliable path is therefore a pull request **on the fork**: open one from the
+temporary candidate branch into the fork's own `main`. For a same-repository
+pull request the workflow definition comes from the head ref, so the fork's
+hardened three jobs run, and the run's `head_sha` is the exact candidate. This
+is our repository, not upstream — it is not an offer, `watch-requests` does not
+own it, and `## Upstream`'s stance about not opening review contexts we did not
+create does not reach it. Close it once the run is green.
+
+`gh workflow run ci.yml --ref <temporary-branch>` may still succeed on a stale
+registration left from before `main` became a mirror. Where it does, the proof
+is valid; do not rely on it continuing to work.
+
+**Exception taken 2026-08-25, on `693a4f6`, by the operator.** GitHub's hosted
+macOS capacity did not schedule the `macos-keychain` job for over four hours
+across three independent runs on the exact candidate — a recurrence of the
+"Actions delays in starting runs" incident GitHub had posted and marked
+resolved the day before. `test` and `test-windows` were green on that commit;
+the whole local gate was green, keychain suites included, against the real
+`security` CLI. The operator accepted the local run as proof and the cycle
+published on that basis.
+
+This is a recorded exception, not a new standard. The gate above is still all
+three jobs. A cycle may not take this exception on its own: it needs the
+operator, for that cycle, on that commit, and it is written into the scratchpad
+with the reason. If a later cycle finds itself wanting this twice, the thing to
+fix is the runner, not the gate — a self-hosted macOS runner would end the
+dependency, and the reason we could not simply add one here is that GitHub
+reserves the `macos-latest` label for hosted runners, so accepting a
+self-hosted label means editing `ci.yml`, which is carried, which changes the
+candidate the run is meant to prove. That edit belongs to a cycle that starts
+by making it, not to one trying to publish.
 
 ## Consumer
 
