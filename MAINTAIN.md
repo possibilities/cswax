@@ -172,8 +172,11 @@ unfinished work, because a later cycle reconciles only what this section names.
   Claude Code cannot resolve the session profile's macOS Keychain credential
   and reports the account as logged out.
 - A matching session profile stays authoritative while idle: a stale backup's
-  `invalid_grant` does not quarantine its lineage, and a bounded native canary
-  that proves freshness clears a backup-derived quarantine.
+  `invalid_grant` does not quarantine its lineage. An expired owner is exposed
+  for native recovery; a fresh owner challenges the backup quarantine with the
+  exact strictly read credential under the usage claim fence, and clears it
+  only after a successful fetch and a post-fetch identity check. An unreadable
+  Keychain, a failed fetch, or identity drift leaves the quarantine intact.
 - Retires when upstream recovers an owner-held expired token without rotating
   backups, keeps the keychain-resolving environment, and does not quarantine
   an idle profile on a stale backup's refusal — all three, read in the code
