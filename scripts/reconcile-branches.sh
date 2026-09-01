@@ -21,6 +21,7 @@ if [ ! -f "$script" ]; then
     exit 1
 fi
 
+export MAINTAIN_WORKSHOP="$(cd "$(dirname "$0")/.." && pwd)"
 export MAINTAIN_CHECKOUT="${CSWAX_CSWAP_CHECKOUT:-$HOME/src/claude-swap}"
 export MAINTAIN_FORK_REPO=possibilities/claude-swap
 export MAINTAIN_UPSTREAM_REPO=realiti4/claude-swap

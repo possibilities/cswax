@@ -135,6 +135,13 @@ upstream needs a reason in its inventory entry for why not.
   reread against upstream rather than replayed from a recorded resolution.
 - `scripts/reconcile-branches.sh` is this repository's entrypoint to the
   shared branch script; it declares these values and nothing else.
+- Supervision: `scripts/reconcile-branches.sh --configure-supervision`
+  converges this model into the bound checkout's own `supervisor.*` git
+  config, which is where advisory tools read it — `/tend` judges a worktree
+  against the integration branch and never proposes removing a carry head's
+  worktree. It is derived state, not a second declaration:
+  `--check-supervision` verifies it, and that this section still names these
+  branches.
 
 ## Features
 
