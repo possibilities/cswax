@@ -28,7 +28,7 @@ retirement condition.
 _Avoid_: permanent patch, downstream fix.
 
 **Offer** — A whole feature proposed upstream: a branch cut from current
-`origin/main`, written as upstream would write it, adversarially reviewed
+`upstream/main`, written as upstream would write it, adversarially reviewed
 before it is pushed, and tended by `watch-requests` rather than by a
 maintenance cycle. #166 and #169 are the two open ones.
 _Avoid_: carry head, PR branch as a synonym for carry head.

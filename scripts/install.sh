@@ -67,10 +67,11 @@ case "${1:-}" in
         ;;
 esac
 
-checkout="${CSWAX_CSWAP_CHECKOUT:-$HOME/src/claude-swap}"
+checkout="${CSWAX_CSWAP_CHECKOUT:-$HOME/source/realiti4--claude-swap}"
 branch=integration
 fork_url="${CSWAX_CSWAP_FORK_URL:-https://github.com/possibilities/claude-swap.git}"
-upstream_remote=origin
+upstream_url="${CSWAX_CSWAP_UPSTREAM_URL:-https://github.com/realiti4/claude-swap.git}"
+upstream_remote=upstream
 upstream_branch=main
 notify_group=cswax.install
 log="${CSWAX_LOG:-$HOME/.local/state/cswax/install.log}"
@@ -112,10 +113,17 @@ remote_matches() {
 }
 
 if [ ! -d "$checkout/.git" ]; then
-    printf 'cswax installer: cloning the public claude-swap fork into %s.\n' "$checkout"
+    printf 'cswax installer: cloning claude-swap upstream into %s.\n' "$checkout"
     mkdir -p "$(dirname "$checkout")"
-    git clone --quiet --origin fork --branch "$branch" "$fork_url" "$checkout" \
-        || die "cloning $fork_url failed"
+    git clone --quiet --origin upstream "$upstream_url" "$checkout" \
+        || die "cloning $upstream_url failed"
+fi
+
+actual_upstream_url="$(git -C "$checkout" remote get-url upstream 2>/dev/null || true)"
+if [ -z "$actual_upstream_url" ]; then
+    git -C "$checkout" remote add upstream "$upstream_url" || die "adding the upstream remote failed"
+elif ! remote_matches "$actual_upstream_url" "$upstream_url"; then
+    die "$checkout remote upstream points at $actual_upstream_url, not $upstream_url; refusing"
 fi
 
 actual_fork_url="$(git -C "$checkout" remote get-url fork 2>/dev/null || true)"

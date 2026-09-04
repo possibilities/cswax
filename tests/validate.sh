@@ -74,7 +74,7 @@ for declared in \
     'MAINTAIN_FORK_REPO=possibilities/claude-swap' \
     'MAINTAIN_UPSTREAM_REPO=realiti4/claude-swap' \
     'MAINTAIN_FORK_REMOTE=fork' \
-    'MAINTAIN_UPSTREAM_REMOTE=origin' \
+    'MAINTAIN_UPSTREAM_REMOTE=upstream' \
     'MAINTAIN_MAIN_BRANCH=main' \
     'MAINTAIN_INTEGRATION_BRANCH=integration' \
     'MAINTAIN_CARRY_PREFIX=carry/' \

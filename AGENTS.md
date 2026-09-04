@@ -32,10 +32,9 @@ changing the fork or its install.
   published `integration` commit and installs it with `uv tool install`. It
   never rebases, publishes, or touches a pull request.
 
-The checkout being maintained is `~/src/claude-swap`, cloned with
-`--origin fork`: `fork` is `possibilities/claude-swap` and `origin` is
-`realiti4/claude-swap`. That is the reverse of the usual reading and is worth
-rechecking before any push.
+The checkout being maintained is `~/source/realiti4--claude-swap`:
+`upstream` is `realiti4/claude-swap` and `fork` is
+`possibilities/claude-swap`. Recheck both before any push.
 
 ## The two open requests
 
@@ -60,7 +59,7 @@ Each carried feature is a `carry/<feature>` head based on current upstream, and
 `integration` is those heads composed in the dependency order `MAINTAIN.md`
 declares. A feature is repaired on its own head; a landed one is dropped by
 removing its head from the composition. An offer to upstream is written fresh
-from current `origin/main`, shaped as upstream would write it — not a carry
+from current `upstream/main`, shaped as upstream would write it — not a carry
 head pushed across.
 
 Maintenance owns only `main`, `integration`, and current `carry/*` heads.

@@ -9,9 +9,8 @@ set -euo pipefail
 # snapshot and one atomic exact-leased push of declared refs that leaves all
 # other heads unchanged) are the skill's and are tested there.
 #
-# The checkout was cloned with `--origin fork`, so the fork is `fork` and
-# upstream is `origin`. That is the reverse of the usual reading; the two
-# repository names below are what the script verifies the remotes against.
+# The Clone convention names the original repository `upstream` and our fork
+# `fork`; the two repository names below are what the script verifies.
 
 skill_dir="${MAINTAIN_SKILL_DIR:-$HOME/.local/share/agentstart/resources/skills/maintain}"
 script="$skill_dir/scripts/reconcile-branches.sh"
@@ -21,12 +20,13 @@ if [ ! -f "$script" ]; then
     exit 1
 fi
 
-export MAINTAIN_WORKSHOP="$(cd "$(dirname "$0")/.." && pwd)"
-export MAINTAIN_CHECKOUT="${CSWAX_CSWAP_CHECKOUT:-$HOME/src/claude-swap}"
+MAINTAIN_WORKSHOP="$(cd "$(dirname "$0")/.." && pwd)"
+export MAINTAIN_WORKSHOP
+export MAINTAIN_CHECKOUT="${CSWAX_CSWAP_CHECKOUT:-$HOME/source/realiti4--claude-swap}"
 export MAINTAIN_FORK_REPO=possibilities/claude-swap
 export MAINTAIN_UPSTREAM_REPO=realiti4/claude-swap
 export MAINTAIN_FORK_REMOTE=fork
-export MAINTAIN_UPSTREAM_REMOTE=origin
+export MAINTAIN_UPSTREAM_REMOTE=upstream
 export MAINTAIN_MAIN_BRANCH=main
 export MAINTAIN_INTEGRATION_BRANCH=integration
 export MAINTAIN_CARRY_PREFIX=carry/

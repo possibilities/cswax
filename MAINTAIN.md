@@ -28,11 +28,8 @@ upstream needs a reason in its inventory entry for why not.
 
 ## Upstream
 
-- Bound checkout: `~/src/claude-swap`. `fork` is `possibilities/claude-swap`;
-  `origin` is `realiti4/claude-swap`. The clone was made with
-  `--origin fork`, so upstream is `origin` and the fork is `fork` — the reverse
-  of the usual reading, and the reason both remotes are named here rather than
-  inferred.
+- Bound checkout: `~/source/realiti4--claude-swap`. `upstream` is
+  `realiti4/claude-swap`; `fork` is `possibilities/claude-swap`.
 - claude-swap has no `AGENTS.md`. The consumer's language is agentusage's
   (`~/code/agentusage/AGENTS.md` and `CONTEXT.md`) — **Provider**, **Route**,
   **Slot** — and is read before touching the fork, because the JSON these
